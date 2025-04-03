@@ -1,0 +1,10 @@
+Added key: 68de6021-9c6b-4978-b518-68927859a754 with value: I am message 1 by logging service: http://127.0.0.1:5001
+Added key: 22d26807-95c9-4b75-bb6f-8e94967aa970 with value: I am message 4 by logging service: http://127.0.0.1:5001
+Added key: afa4b8bd-3497-4a89-8b75-b85880af4dbd with value: I am message 5 by logging service: http://127.0.0.1:5001
+Added key: 62824158-52f1-4fe3-b46c-21d3bbda931e with value: I am message 6 by logging service: http://127.0.0.1:5001
+Post request
+Added key: 02247550-a802-46a6-a0ca-00eba6d0988c with value: I am message 2 by logging service: http://127.0.0.1:5001
+Post request
+Added key: 89d2f4c7-c720-4ccb-a23d-c8f59b8e5233 with value: I am message 2 by logging service: http://127.0.0.1:5001
+Post request
+Added key: a9bf0f9f-87d9-45c5-8597-78574e75b569 with value: I am message 8 by logging service: http://127.0.0.1:5001

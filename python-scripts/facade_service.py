@@ -1,18 +1,35 @@
 import requests
 import sys
+import os
 import uvicorn
-from random import randint
+from random import shuffle
 import uuid
 import json
-from random import shuffle
 from fastapi import FastAPI
-from domain import *
 from urllib.parse import urlparse
+from kafka import KafkaProducer
 
-messages_urls = None
+messages_urls = []
 logging_urls = []
+kafka_urls = []
+
+host_url = None
+config_server_url = None
+port = None
+
+TOPIC_NAME = "messages"
 
 app = FastAPI()
+
+def write_log(message: str, port: int):
+    log_dir = "./logs"
+    os.makedirs(log_dir, exist_ok=True)
+
+    script_name = os.path.basename(sys.argv[0])
+    log_path = os.path.join(log_dir, f"{script_name}-{port}.txt")
+
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(message + "\n")
 
 def get_service_ips(service_name):
     try:
@@ -23,57 +40,83 @@ def get_service_ips(service_name):
         print(f"Error retrieving {service_name} IPs: {e}")
         return []
 
+def send_message_to_queue(message):
+    write_log(f"Writing message {message} to the queue", port)
+
+    if not kafka_urls:
+        print("Kafka service is unavailable")
+        return
+    
+    producer = KafkaProducer(bootstrap_servers=kafka_urls)
+    producer.send(TOPIC_NAME, bytes(message, "UTF-8"))
+    producer.flush()
+
 @app.post("/")
 def add_data(message: dict):
     uuid_val = uuid.uuid4()
-    data = {"uuid": str(uuid_val), "msg": message.get("msg", "")}
+    message_value = message.get("msg", "")
+    data = {"uuid": str(uuid_val), "msg": message_value}
     
     shuffled_urls = logging_urls[:]
     shuffle(shuffled_urls)
     
-    for url in shuffled_urls:
+    for logging_service_url in shuffled_urls:
         try:
-            response = requests.post(url, json=data, timeout=3)
+            response = requests.post(logging_service_url, json=data, timeout=3)
             if response.status_code == 200:
-                print("Message sent successfully")
-                return {"msg": "success"}
+                print("Message sent successfully to the logging service")
+                break
         except requests.exceptions.RequestException as e:
-            return(f"Error with logging service {url}: {e}")
+            return {"error": f"Error with logging service {logging_service_url}: {e}"}
+        
+    send_message_to_queue(message_value)
     
-    return {"msg": f"logging service mistake {response.status_code}"}
-
+    return {"msg": "success"}
 
 @app.get("/")
 def get_data():
     shuffled_logging_urls = logging_urls[:]
     shuffle(shuffled_logging_urls)
     
+    logging_service_messages = {"error": "No logging service available"}
+    messages_service_messages = {"error": "Messages service unavailable"}
+
     for url in shuffled_logging_urls:
         try:
             logging_service_response = requests.get(url, timeout=3)
             if logging_service_response.status_code == 200:
-                logging_messages = json.loads(logging_service_response.content.decode("utf-8"))
+                logging_service_messages = json.loads(logging_service_response.content.decode("utf-8"))
                 break
         except requests.exceptions.RequestException as e:
-            print(f"Error with logging service {url}: {e}")
-    else:
-        logging_messages = {"error": "No logging service available"}
-    
-    try:
-        messages_service_response = requests.get(messages_urls[0], timeout=3)
-        messages_service_messages = json.loads(messages_service_response.content.decode("utf-8"))
-    except requests.exceptions.RequestException as e:
-        print(f"Error with messages service {messages_urls[0]}: {e}")
-        messages_service_messages = {"error": "Messages service unavailable"}
-    
-    return {"logging_service_response": logging_messages, "messages_service_response": messages_service_messages}
+            print({"err" : f"Error with logging service {url}: {e}"})
 
+    for messages_url in messages_urls:
+        write_log(str(messages_url), port)
+        try:
+            messages_service_response = requests.get(messages_url, timeout=10)
+            write_log(f"Response is: {messages_service_response.status_code}", port)
+            if messages_service_response.status_code == 200:
+                messages_service_messages = json.loads(messages_service_response.content.decode("utf-8"))["msg"]
+                break
+        except requests.exceptions.RequestException as e:
+            print({"err": f"Error with messages service {messages_url}: {e}"})
+
+    return {
+        "logging_service_response": logging_service_messages,
+        "messages_service_response": messages_service_messages
+    }
 
 if __name__ == "__main__":
+    if len(sys.argv) < 3:
+        print("Usage: facade_service.py <host_url> <config_server_url>")
+        sys.exit(1)
+    
     host_url = urlparse(sys.argv[1])
     config_server_url = sys.argv[2]
 
-    messages_urls = get_service_ips("messages-service")
+    messages_urls = get_service_ips("messages-services")
     logging_urls = get_service_ips("logging-services")
+    kafka_urls = get_service_ips("kafka-services")
 
-    uvicorn.run(app, host=host_url.hostname, port=host_url.port)
+    port = host_url.port
+    uvicorn.run(app, host=host_url.hostname, port=port)

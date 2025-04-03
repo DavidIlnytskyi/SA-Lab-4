@@ -1,0 +1,26 @@
+Response is: 200
+http://127.0.0.1:5006
+Response is: 200
+http://127.0.0.1:5006
+Response is: 200
+Writing message I am message 2 to the queue
+Writing message I am message 2 to the queue
+Writing message I am message 2 to the queue
+Writing message I am message 2 to the queue
+Writing message I am message 2 to the queue
+Writing message I am message 2 to the queue
+http://127.0.0.1:5006
+Response is: 200
+Writing message I am message 2 to the queue
+Writing message I am message 0 to the queue
+Writing message I am message 1 to the queue
+Writing message I am message 2 to the queue
+Writing message I am message 3 to the queue
+Writing message I am message 4 to the queue
+Writing message I am message 5 to the queue
+Writing message I am message 6 to the queue
+Writing message I am message 7 to the queue
+Writing message I am message 8 to the queue
+Writing message I am message 9 to the queue
+http://127.0.0.1:5006
+Response is: 200

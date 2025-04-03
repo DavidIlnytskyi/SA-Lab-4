@@ -1,6 +1,6 @@
 import requests
 
-URL = "http://127.0.0.1:5005"
+URL = "http://127.0.0.1:5004"
 
 for i in range(10):
     message = {"msg": f"I am message {i}"}

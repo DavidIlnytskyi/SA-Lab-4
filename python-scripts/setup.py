@@ -27,9 +27,11 @@ if __name__ == "__main__":
             if process:
                 processes.append(process)
 
-        messages_service_ip = config["messages-service"].get("ips")
-        if messages_service_ip:
-            process = start_service("Messages Service", "messages_service", messages_service_ip)
+        messages_service_ip = config["messages-services"].get("ips").split(", ")
+        kafka_service_ip = config["kafka-services"].get("ips").split(", ")
+
+        for idx, msg_ip in enumerate(messages_service_ip):
+            process = start_service(f"Messages Service {idx+1}", "messages_service", msg_ip, config_service_ip, str(idx))
             if process:
                 processes.append(process)
 
@@ -46,7 +48,6 @@ if __name__ == "__main__":
             process = start_service("Facade Service", "facade_service", facade_service_ip, config_service_ip)
             if process:
                 processes.append(process)
-
 
         while True:
             pass
