@@ -68,7 +68,10 @@ def add_data(message: dict):
 @app.get("/")
 def get_data():
     shuffled_logging_urls = logging_urls[:]
+    shuffled_messages_urls = messages_urls[:]
+    
     shuffle(shuffled_logging_urls)
+    shuffle(shuffled_messages_urls)
     
     logging_service_messages = {"error": "No logging service available"}
     messages_service_messages = {"error": "Messages service unavailable"}
@@ -82,8 +85,7 @@ def get_data():
         except requests.exceptions.RequestException as e:
             print({"err" : f"Error with logging service {url}: {e}"})
 
-    for messages_url in messages_urls:
-        write_log(str(messages_url), port)
+    for messages_url in shuffled_messages_urls:
         try:
             messages_service_response = requests.get(messages_url, timeout=10)
             if messages_service_response.status_code == 200:
