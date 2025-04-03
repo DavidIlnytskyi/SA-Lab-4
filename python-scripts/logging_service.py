@@ -1,27 +1,17 @@
-from fastapi import FastAPI
-import uvicorn
-import hazelcast
-import sys
-import os
+from util_functions import write_log
 from urllib.parse import urlparse
+from fastapi import FastAPI
 from domain import *
+import hazelcast
+import uvicorn
+import sys
 
 app = FastAPI()
+
 distributed_map = None
 client = None
 host_url = None
 port = None
-
-
-def write_log(message: str, port: int):
-    log_dir = "./logs"
-    os.makedirs(log_dir, exist_ok=True)
-
-    script_name = os.path.basename(sys.argv[0])
-    log_path = os.path.join(log_dir, f"{script_name}-{port}.txt")
-
-    with open(log_path, "a", encoding="utf-8") as log_file:
-        log_file.write(message + "\n")
 
 
 @app.post("/")
@@ -40,7 +30,6 @@ def get_data():
 
 @app.on_event("startup")
 def startup_event():
-    # write_log("Start up service", port)
 
     global distributed_map, client, host_url, port
 

@@ -1,13 +1,14 @@
-import requests
-import sys
-import os
-import uvicorn
-from random import shuffle
-import uuid
-import json
 from fastapi import FastAPI
 from urllib.parse import urlparse
 from kafka import KafkaProducer
+from util_functions import write_log
+from random import shuffle
+import requests
+import sys
+import uvicorn
+import uuid
+import json
+
 
 messages_urls = []
 logging_urls = []
@@ -21,15 +22,6 @@ TOPIC_NAME = "messages"
 
 app = FastAPI()
 
-def write_log(message: str, port: int):
-    log_dir = "./logs"
-    os.makedirs(log_dir, exist_ok=True)
-
-    script_name = os.path.basename(sys.argv[0])
-    log_path = os.path.join(log_dir, f"{script_name}-{port}.txt")
-
-    with open(log_path, "a", encoding="utf-8") as log_file:
-        log_file.write(message + "\n")
 
 def get_service_ips(service_name):
     try:
@@ -94,7 +86,6 @@ def get_data():
         write_log(str(messages_url), port)
         try:
             messages_service_response = requests.get(messages_url, timeout=10)
-            write_log(f"Response is: {messages_service_response.status_code}", port)
             if messages_service_response.status_code == 200:
                 messages_service_messages = json.loads(messages_service_response.content.decode("utf-8"))["msg"]
                 break

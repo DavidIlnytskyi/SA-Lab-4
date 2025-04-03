@@ -1,6 +1,6 @@
 from fastapi import FastAPI
+from util_functions import write_log
 import uvicorn
-import os
 import sys
 from urllib.parse import urlparse
 import requests
@@ -9,16 +9,6 @@ from kafka import KafkaConsumer
 app = FastAPI()
 
 TOPIC_NAME = "messages"
-
-def write_log(message: str, port: int):
-    log_dir = "./logs"
-    os.makedirs(log_dir, exist_ok=True)
-
-    script_name = os.path.basename(sys.argv[0])
-    log_path = os.path.join(log_dir, f"{script_name}-{port}.txt")
-
-    with open(log_path, "a", encoding="utf-8") as log_file:
-        log_file.write(message + "\n")
 
 def get_service_ips(service_name):
     try:
