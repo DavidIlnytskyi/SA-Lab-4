@@ -56,7 +56,7 @@ def add_data(message: dict):
         try:
             response = requests.post(logging_service_url, json=data, timeout=3)
             if response.status_code == 200:
-                print("Message sent successfully to the logging service")
+                write_log(f"Sending message {message_value} to the logging service", port)
                 break
         except requests.exceptions.RequestException as e:
             return {"error": f"Error with logging service {logging_service_url}: {e}"}
@@ -68,22 +68,25 @@ def add_data(message: dict):
 @app.get("/")
 def get_data():
     shuffled_logging_urls = logging_urls[:]
+    shuffled_messages_urls = messages_urls[:]
+
     shuffle(shuffled_logging_urls)
+    shuffle(shuffled_messages_urls)
     
     logging_service_messages = {"error": "No logging service available"}
     messages_service_messages = {"error": "Messages service unavailable"}
 
-    for url in shuffled_logging_urls:
+    for logging_url in shuffled_logging_urls:
         try:
-            logging_service_response = requests.get(url, timeout=3)
+            logging_service_response = requests.get(logging_url, timeout=3)
             if logging_service_response.status_code == 200:
                 logging_service_messages = json.loads(logging_service_response.content.decode("utf-8"))
                 break
         except requests.exceptions.RequestException as e:
-            print({"err" : f"Error with logging service {url}: {e}"})
+            print({"err" : f"Error with logging service {logging_url}: {e}"})
 
-    for messages_url in messages_urls:
-        write_log(str(messages_url), port)
+    for messages_url in shuffled_messages_urls:
+        write_log(f"Messages are being written to message service: {messages_url}", port)
         try:
             messages_service_response = requests.get(messages_url, timeout=10)
             if messages_service_response.status_code == 200:
@@ -105,9 +108,11 @@ if __name__ == "__main__":
     host_url = urlparse(sys.argv[1])
     config_server_url = sys.argv[2]
 
-    messages_urls = get_service_ips("messages-services")
+    messages_urls = [msg.strip() for msg in get_service_ips("messages-services")]
     logging_urls = get_service_ips("logging-services")
     kafka_urls = get_service_ips("kafka-services")
 
     port = host_url.port
+
+    write_log("Starting up server", port)
     uvicorn.run(app, host=host_url.hostname, port=port)

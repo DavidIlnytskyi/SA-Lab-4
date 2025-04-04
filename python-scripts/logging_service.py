@@ -13,7 +13,6 @@ client = None
 host_url = None
 port = None
 
-
 @app.post("/")
 def add_data(data: DataModel):
     write_log("Post request", port)
@@ -48,4 +47,8 @@ def startup_event():
 
 if __name__ == "__main__":
     parsed_url = urlparse(sys.argv[1])
-    uvicorn.run(app, host=parsed_url.hostname, port=parsed_url.port)
+
+    port = parsed_url.port
+    
+    write_log("Starting up server", port)
+    uvicorn.run(app, host=parsed_url.hostname, port=port)
