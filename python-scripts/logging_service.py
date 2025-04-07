@@ -42,8 +42,11 @@ def startup_event():
     parsed_url = urlparse(host_url)
     port = parsed_url.port
 
+    write_log("Connecting to Hazelcase client", port)
     client = hazelcast.HazelcastClient(cluster_members=[hazelcast_url])
     distributed_map = client.get_map("my-distributed-map").blocking()
+
+    write_log("Connected to Hazelcase client", port)
 
 if __name__ == "__main__":
     parsed_url = urlparse(sys.argv[1])

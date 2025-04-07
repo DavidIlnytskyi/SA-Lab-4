@@ -100,10 +100,14 @@ def get_data():
         except requests.exceptions.RequestException as e:
             print({"err": f"Error with messages service {messages_url}: {e}"})
 
-    return {
+    GET_request_response = {
         "logging_service_response": logging_service_messages,
         "messages_service_response": messages_service_messages
     }
+
+    write_log(f"GET request response: {GET_request_response}", port)
+
+    return GET_request_response
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

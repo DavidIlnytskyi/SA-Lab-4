@@ -38,7 +38,8 @@ def consume_messages():
             auto_offset_reset="latest",
             enable_auto_commit=True,
             group_id=KAFKA_GROUP_ID,
-            api_version=(2, 0, 2)
+            api_version=(2, 0, 2),
+            request_timeout_ms=15000
         )
         write_log("Kafka Consumer Connected", port)
     except Exception as e:
@@ -83,5 +84,5 @@ if __name__ == "__main__":
     except Exception as e:
         write_log(f"Exception {e}", )
     
-    write_log(f"Starting up server: {host_url}, {config_server_url}, {kafka_url}", port)
+    write_log(f"Starting up server: {host_url.hostname}:{port}", port)
     uvicorn.run(app, host=host_url.hostname, port=port)
