@@ -45,6 +45,7 @@ def send_message_to_queue(message):
 
 @app.post("/")
 def add_data(message: dict):
+    write_log("POST request", port)
     uuid_val = uuid.uuid4()
     message_value = message.get("msg", "")
     data = {"uuid": str(uuid_val), "msg": message_value}
@@ -67,6 +68,7 @@ def add_data(message: dict):
 
 @app.get("/")
 def get_data():
+    write_log("GET request", port)
     shuffled_logging_urls = logging_urls[:]
     shuffled_messages_urls = messages_urls[:]
     
@@ -78,18 +80,22 @@ def get_data():
 
     for logging_url in shuffled_logging_urls:
         try:
+            write_log(f"Trying to connect to logging service: {logging_url}", port)
             logging_service_response = requests.get(logging_url, timeout=3)
             if logging_service_response.status_code == 200:
                 logging_service_messages = json.loads(logging_service_response.content.decode("utf-8"))
+                write_log(f"Connected successfully", port)
                 break
         except requests.exceptions.RequestException as e:
             print({"err" : f"Error with logging service {logging_url}: {e}"})
 
     for messages_url in shuffled_messages_urls:
         try:
+            write_log(f"Trying to connect to messages service: {messages_url}", port)
             messages_service_response = requests.get(messages_url, timeout=10)
             if messages_service_response.status_code == 200:
                 messages_service_messages = json.loads(messages_service_response.content.decode("utf-8"))["msg"]
+                write_log(f"Connected successfully", port)
                 break
         except requests.exceptions.RequestException as e:
             print({"err": f"Error with messages service {messages_url}: {e}"})
