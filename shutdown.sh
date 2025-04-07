@@ -1,5 +1,8 @@
+echo "Shutdown hazelcast"
 bash ./bash-scripts/stop-hazelcast.sh
 cd ./bash-scripts/
+
+echo "Shutdown Kafka"
 docker compose down
 
 cd .. 

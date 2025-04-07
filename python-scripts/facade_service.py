@@ -123,5 +123,5 @@ if __name__ == "__main__":
 
     port = host_url.port
 
-    write_log("Starting up server", port)
+    write_log(f"Starting up server {host_url.hostname}:{port}", port)
     uvicorn.run(app, host=host_url.hostname, port=port)

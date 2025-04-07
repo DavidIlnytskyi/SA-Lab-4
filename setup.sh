@@ -30,11 +30,22 @@ done
 
 echo "Kafka is ready!"
 
-docker exec -it kafka-1 kafka-topics --create --topic messages \
+if ! docker exec -it kafka-1 kafka-topics --create --topic messages \
   --bootstrap-server kafka-1:19092 \
   --replication-factor 3 \
-  --partitions 3
+  --partitions 3 2>&1 | grep -q 'exist'; then
+  echo "Messages topic created."
+else
+  echo "Messages topic already exists."
+fi
 
 cd ..
-rm logs/*
+
+if ! rm logs/* 2>&1 | grep -q 'No such file'; then
+  echo "Logs dir is cleaned."
+else
+  echo "Logs dir is empty."
+fi
+
+
 python3 python-scripts/setup.py
