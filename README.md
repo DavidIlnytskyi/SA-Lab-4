@@ -13,6 +13,10 @@ pip install -r requirements.txt
 
 ### Setup 
 ```
+docker network create --subnet=172.18.0.0/16 hazelcast-network
+```
+
+```
 bash setup.sh
 ```
 
